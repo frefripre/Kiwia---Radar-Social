@@ -1,0 +1,8 @@
+{
+  "name": "Kiwia - Radar Social",
+  "description": "Comunicación offline vía Bluetooth 5.0. Encuentra personas en tu paradero sin necesidad de internet.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera"
+  ]
+}
