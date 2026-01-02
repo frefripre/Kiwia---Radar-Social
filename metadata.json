@@ -1,8 +1,9 @@
 {
-  "name": "Kiwia - Radar Social",
-  "description": "Comunicación offline vía Bluetooth 5.0. Encuentra personas en tu paradero sin necesidad de internet.",
+  "name": "Kiwia - Moments & Radar",
+  "description": "Red social local para paraderos. Detecta personas vía Bluetooth y crea Kiwia Moments con IA generativa.",
   "requestFramePermissions": [
     "geolocation",
-    "camera"
+    "camera",
+    "microphone"
   ]
 }

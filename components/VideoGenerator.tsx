@@ -4,7 +4,7 @@ import { generateVideoWithVeo, checkApiKey, openApiKeyDialog } from '../services
 
 export const VideoGenerator: React.FC = () => {
   const [image, setImage] = useState<string | null>(null);
-  const [prompt, setPrompt] = useState('Animate this bus stop scene with a warm morning sunlight, birds flying past, and people gently checking their phones.');
+  const [prompt, setPrompt] = useState('Animate this bus stop scene with cinematic lighting, neon reflections, and smooth movement.');
   const [isGenerating, setIsGenerating] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState('');
@@ -30,14 +30,14 @@ export const VideoGenerator: React.FC = () => {
     }
 
     setIsGenerating(true);
-    setStatusMessage('Preparing your scene...');
+    setStatusMessage('Iniciando Veo 3.1...');
     
     try {
       const messages = [
-        'Analyzing colors and movement...',
-        'Synthesizing cinematic frames...',
-        'Almost there! Polishing the details...',
-        'Finalizing your Kiwi Moment...'
+        'Analizando geometría de la escena...',
+        'Sintetizando frames cinemáticos...',
+        'Renderizando texturas y luz...',
+        'Finalizando tu Kiwi Moment...'
       ];
 
       let msgIndex = 0;
@@ -48,7 +48,7 @@ export const VideoGenerator: React.FC = () => {
         }
       }, 8000);
 
-      const url = await generateVideoWithVeo(prompt, image || undefined);
+      const url = await generateVideoWithVeo(prompt, image || undefined, '9:16');
       setVideoUrl(url);
       clearInterval(interval);
     } catch (err: any) {
@@ -57,7 +57,7 @@ export const VideoGenerator: React.FC = () => {
         setError("API Key issue. Please select a valid key from a paid GCP project.");
         await openApiKeyDialog();
       } else {
-        setError("Something went wrong during generation. Please try again.");
+        setError("Error de generación. Reintenta en unos momentos.");
       }
     } finally {
       setIsGenerating(false);
@@ -65,104 +65,114 @@ export const VideoGenerator: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="bg-white rounded-3xl shadow-xl p-8 border border-lime-100">
-        <h2 className="text-3xl font-extrabold text-lime-900 mb-2">Kiwi Moments 🎬</h2>
-        <p className="text-lime-700 mb-8">Turn your waiting time into art. Upload a photo of your stop and let Veo animate it.</p>
+    <div className="max-w-md mx-auto px-6 py-8 pb-32">
+      <div className="mb-8">
+        <h2 className="text-3xl font-black text-white leading-tight">Crea un<br/><span className="text-lime-500 italic">Kiwi Moment</span></h2>
+        <p className="text-white/40 text-xs mt-3 leading-relaxed">Convierte la espera en arte. Sube una foto de tu paradero y deja que la IA de Google Veo le dé vida.</p>
+      </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Controls */}
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-bold text-lime-900 mb-2">1. Upload your stop (Optional)</label>
-              <div className="relative border-2 border-dashed border-lime-200 rounded-2xl p-4 transition hover:border-lime-400">
-                {image ? (
-                  <div className="relative aspect-video rounded-lg overflow-hidden group">
-                    <img src={image} className="w-full h-full object-cover" alt="Uploaded" />
-                    <button 
-                      onClick={() => setImage(null)}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-8">
-                    <span className="text-4xl mb-2">📸</span>
-                    <p className="text-sm text-lime-500">Click to upload or drag & drop</p>
-                    <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleImageUpload} accept="image/*" />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-lime-900 mb-2">2. How should it feel?</label>
-              <textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="w-full p-4 rounded-2xl border border-lime-200 focus:ring-2 focus:ring-lime-500 focus:outline-none text-sm h-32"
-                placeholder="Describe the animation..."
-              />
-            </div>
-
-            <button
-              onClick={handleGenerate}
-              disabled={isGenerating}
-              className={`w-full py-4 rounded-full font-bold text-lg transition shadow-lg ${
-                isGenerating 
-                  ? 'bg-lime-200 text-lime-500 cursor-not-allowed' 
-                  : 'bg-lime-600 text-white hover:bg-lime-700 hover:shadow-xl'
-              }`}
-            >
-              {isGenerating ? 'Generating Video...' : 'Animate with Veo'}
-            </button>
-
-            {error && (
-              <p className="text-red-500 text-sm font-medium mt-2">⚠️ {error}</p>
-            )}
-          </div>
-
-          {/* Result */}
-          <div className="flex flex-col items-center justify-center bg-lime-50 rounded-2xl p-6 border border-lime-100">
-            {isGenerating ? (
-              <div className="text-center space-y-4">
-                <div className="relative w-24 h-24 mx-auto">
-                  <div className="absolute inset-0 border-4 border-lime-200 rounded-full"></div>
-                  <div className="absolute inset-0 border-4 border-lime-600 rounded-full border-t-transparent animate-spin"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">🥝</div>
-                </div>
-                <p className="text-lime-800 font-bold animate-pulse">{statusMessage}</p>
-                <p className="text-xs text-lime-600 max-w-xs">High-quality video generation can take up to 2 minutes. Please don't close this tab.</p>
-              </div>
-            ) : videoUrl ? (
-              <div className="w-full space-y-4">
-                <h3 className="text-center font-bold text-lime-900">Your Kiwi Moment is ready!</h3>
-                <video src={videoUrl} controls autoPlay loop className="w-full rounded-xl shadow-2xl border-4 border-white" />
+      <div className="space-y-6">
+        {/* Upload */}
+        <div className="relative group">
+          <div className={`relative aspect-[9/16] rounded-[32px] overflow-hidden border-2 border-dashed transition-all ${image ? 'border-lime-500' : 'border-white/10 bg-white/5 hover:border-white/20'}`}>
+            {image ? (
+              <div className="relative h-full w-full">
+                <img src={image} className="w-full h-full object-cover" alt="Uploaded" />
                 <button 
-                  onClick={() => {
-                    const a = document.createElement('a');
-                    a.href = videoUrl;
-                    a.download = 'kiwi-moment.mp4';
-                    a.click();
-                  }}
-                  className="w-full py-2 bg-white text-lime-600 border border-lime-200 rounded-xl font-bold hover:bg-lime-50"
+                  onClick={() => setImage(null)}
+                  className="absolute top-4 right-4 bg-black/50 backdrop-blur-md text-white p-2 rounded-2xl hover:bg-red-500 transition-colors"
                 >
-                  Download Video
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
               </div>
             ) : (
-              <div className="text-center text-lime-400">
-                <div className="text-6xl mb-4">🎥</div>
-                <p>Your AI-generated video will appear here</p>
-                <p className="text-xs mt-2 italic">Requires a paid Google Cloud project API key</p>
-              </div>
+              <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer">
+                <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">📸</div>
+                <p className="text-xs font-bold text-white/60 uppercase tracking-widest">Sube tu paradero</p>
+                <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
+              </label>
             )}
           </div>
         </div>
+
+        {/* Prompt */}
+        <div className="bg-zinc-900/50 p-5 rounded-3xl border border-white/5">
+          <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-3">Estilo de animación</label>
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            className="w-full bg-transparent text-white text-sm focus:outline-none h-20 resize-none placeholder:text-white/10"
+            placeholder="Describe cómo quieres que se vea..."
+          />
+        </div>
+
+        <button
+          onClick={handleGenerate}
+          disabled={isGenerating}
+          className={`w-full py-5 rounded-[24px] font-black text-sm uppercase tracking-[0.2em] transition-all shadow-xl ${
+            isGenerating 
+              ? 'bg-zinc-800 text-white/20 cursor-not-allowed' 
+              : 'bg-white text-black hover:bg-lime-500 active:scale-95'
+          }`}
+        >
+          {isGenerating ? 'Generando...' : 'Animar con Veo'}
+        </button>
+
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl">
+            <p className="text-red-500 text-[10px] font-bold text-center">⚠️ {error}</p>
+          </div>
+        )}
+
+        {/* Video Overlay / Result */}
+        {isGenerating && (
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[60] flex flex-col items-center justify-center p-10 text-center">
+            <div className="relative w-32 h-32 mb-8">
+              <div className="absolute inset-0 border-2 border-lime-500/20 rounded-full"></div>
+              <div className="absolute inset-0 border-2 border-lime-500 rounded-full border-t-transparent animate-spin"></div>
+              <div className="absolute inset-0 flex items-center justify-center text-4xl">🥝</div>
+            </div>
+            <h3 className="text-xl font-black text-white mb-2">{statusMessage}</h3>
+            <p className="text-white/40 text-xs max-w-xs leading-relaxed">La generación de video de alta calidad toma unos 2 minutos. No cierres esta ventana.</p>
+          </div>
+        )}
+
+        {videoUrl && (
+          <div className="fixed inset-0 bg-black z-[60] flex flex-col animate-in fade-in duration-700">
+            <div className="flex-1 relative">
+              <video src={videoUrl} controls autoPlay loop className="w-full h-full object-cover" />
+              <button 
+                onClick={() => setVideoUrl(null)}
+                className="absolute top-8 right-8 w-12 h-12 bg-black/50 backdrop-blur-md rounded-2xl flex items-center justify-center text-white text-2xl"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-8 pb-12 bg-zinc-950 flex gap-4">
+              <button 
+                onClick={() => {
+                  const a = document.createElement('a');
+                  a.href = videoUrl;
+                  a.download = 'kiwi-moment.mp4';
+                  a.click();
+                }}
+                className="flex-1 bg-white text-black py-5 rounded-3xl font-black uppercase text-xs tracking-widest shadow-xl active:scale-95 transition-all"
+              >
+                Descargar MP4
+              </button>
+              <button 
+                onClick={() => setVideoUrl(null)}
+                className="flex-1 bg-white/5 border border-white/10 text-white/60 py-5 rounded-3xl font-black uppercase text-xs tracking-widest"
+              >
+                Nuevo
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-      <div className="mt-6 text-center text-xs text-lime-500">
-        Powered by Google Veo & Gemini • <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" className="underline hover:text-lime-700">Billing Docs</a>
+
+      <div className="mt-12 text-center">
+        <p className="text-[9px] text-white/20 uppercase tracking-[0.3em] font-bold">Powered by Google Veo & Gemini</p>
       </div>
     </div>
   );

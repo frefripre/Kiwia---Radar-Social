@@ -27,5 +27,6 @@ export enum AppState {
   PROFILE_SETUP = 'profile_setup',
   RADAR = 'radar',
   CHAT = 'chat',
-  KNOWN = 'known'
+  KNOWN = 'known',
+  MOMENTS = 'moments'
 }
