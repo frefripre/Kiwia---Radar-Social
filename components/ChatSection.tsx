@@ -1,112 +1,155 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-// Fixed: BusStop is not exported from types.ts
 import { Message } from '../types';
+import { db } from '../services/firebase';
+import { 
+  collection, 
+  addDoc, 
+  query, 
+  orderBy, 
+  onSnapshot, 
+  limit,
+  serverTimestamp 
+} from "firebase/firestore";
 
-export const ChatSection: React.FC = () => {
-  // Fixed: Updated mock messages to use number timestamps (Date.now()) and added required status field to match Message interface
-  const [messages, setMessages] = useState<Message[]>([
-    { id: '1', senderId: 'Mateo', text: '¿Alguien sabe si el 402 viene retrasado?', timestamp: Date.now(), status: 'delivered' },
-    { id: '2', senderId: 'Elena', text: 'Sí, la app dice que está a 10 minutos aún.', timestamp: Date.now(), status: 'delivered' },
-    { id: '3', senderId: 'Sofia', text: 'Hola a todos! Qué calor hace hoy en el paradero.', timestamp: Date.now(), status: 'delivered' },
-  ]);
+interface ChatSectionProps {
+  recipientName: string;
+  recipientAvatar: string;
+  onBack: () => void;
+}
+
+export const ChatSection: React.FC<ChatSectionProps> = ({ recipientName, recipientAvatar, onBack }) => {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
+  
+  // Obtenemos mi perfil local para saber quién soy
+  const myProfile = JSON.parse(localStorage.getItem('kiwia_profile') || '{"username": "Yo"}');
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // ESCUCHAR MENSAJES EN TIEMPO REAL DESDE FIREBASE
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Definimos la colección de chats (en una app real usaríamos un ID de sala único)
+    const q = query(
+      collection(db, "chats"), 
+      orderBy("timestamp", "asc"),
+      limit(50)
+    );
 
-  const handleSendMessage = (e: React.FormEvent) => {
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedMessages = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        // Convertimos el timestamp de Firebase a número de JS
+        timestamp: doc.data().timestamp?.toMillis() || Date.now()
+      })) as Message[];
+      
+      setMessages(fetchedMessages);
+      setTimeout(scrollToBottom, 100);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputText.trim()) return;
 
-    // Fixed: Created message matching the interface (senderId instead of sender, number timestamp, and added status)
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      senderId: 'Me',
-      text: inputText,
-      timestamp: Date.now(),
-      status: 'sent',
-    };
-
-    setMessages([...messages, newMessage]);
+    const textToSend = inputText;
     setInputText('');
 
-    // Simulate response
-    setTimeout(() => {
-      // Fixed: Mock response updated to match Message interface
-      const response: Message = {
-        id: (Date.now() + 1).toString(),
-        senderId: 'Mateo',
-        text: '¡Gracias por avisar!',
-        timestamp: Date.now(),
-        status: 'delivered',
-      };
-      setMessages(prev => [...prev, response]);
-    }, 1500);
+    try {
+      // ENVIAR A FIREBASE
+      await addDoc(collection(db, "chats"), {
+        senderId: myProfile.username,
+        text: textToSend,
+        timestamp: serverTimestamp(),
+        status: 'sent'
+      });
+    } catch (err) {
+      console.error("Error al enviar mensaje a Firebase:", err);
+      alert("Configura tu Firebase en services/firebase.ts para chatear de verdad.");
+    }
   };
 
   return (
-    <div className="flex flex-col h-[70vh] max-w-2xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-lime-100">
+    <div className="flex flex-col h-full bg-black text-white">
       {/* Header */}
-      <div className="bg-lime-500 p-4 text-white flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="bg-white/20 p-2 rounded-full">🚌</div>
-          <div>
-            <h2 className="font-bold text-lg">Paradero Plaza Italia</h2>
-            <p className="text-xs opacity-90">4 personas activas ahora</p>
+      <div className="bg-zinc-950/80 backdrop-blur-md p-4 flex items-center justify-between border-b border-white/5">
+        <div className="flex items-center gap-4">
+          <button onClick={onBack} className="p-2 -ml-2 text-white/60 hover:text-white transition-colors">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl overflow-hidden border border-white/10">
+              <img src={recipientAvatar} alt="" className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <h2 className="font-bold text-sm">{recipientName}</h2>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 bg-lime-500 rounded-full animate-pulse"></div>
+                <p className="text-[10px] text-lime-500 font-bold uppercase tracking-widest">Canal Firestore Live</p>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="bg-green-400 w-3 h-3 rounded-full animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]"></div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-lime-50/30">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        {messages.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full text-center opacity-20">
+            <div className="text-4xl mb-2">💬</div>
+            <p className="text-[10px] font-black uppercase tracking-widest">No hay mensajes aún</p>
+          </div>
+        )}
         {messages.map((msg) => (
           <div
             key={msg.id}
-            // Fixed: Replaced isMe property check with senderId comparison against 'Me'
-            className={`flex flex-col ${msg.senderId === 'Me' ? 'items-end' : 'items-start'}`}
+            className={`flex flex-col ${msg.senderId === myProfile.username ? 'items-end' : 'items-start'}`}
           >
-            <span className="text-[10px] font-semibold text-lime-700 mb-1 px-2">
-              {/* Fixed: Replaced missing sender property with senderId */}
-              {msg.senderId}
-            </span>
             <div
-              className={`max-w-[80%] px-4 py-2 rounded-2xl shadow-sm text-sm ${
-                msg.senderId === 'Me'
-                  ? 'bg-lime-600 text-white rounded-tr-none'
-                  : 'bg-white text-lime-900 border border-lime-100 rounded-tl-none'
+              className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm shadow-xl transition-all duration-300 ${
+                msg.senderId === myProfile.username
+                  ? 'bg-zinc-900 text-white rounded-tr-none border border-white/5'
+                  : 'bg-lime-500 text-black font-medium rounded-tl-none'
               }`}
             >
+              <div className="text-[8px] opacity-40 mb-1 font-black uppercase tracking-widest">
+                {msg.senderId === myProfile.username ? 'Tú' : msg.senderId}
+              </div>
               {msg.text}
+              <div className="mt-1.5 flex items-center justify-end gap-1.5">
+                <span className={`text-[9px] ${msg.senderId === myProfile.username ? 'text-white/40' : 'text-black/40'}`}>
+                  {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
             </div>
-            {/* Fixed: Wrapped number timestamp in Date object to use toLocaleTimeString */}
-            <span className="text-[9px] text-lime-400 mt-1">
-              {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </span>
           </div>
         ))}
         <div ref={chatEndRef} />
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-lime-100 flex gap-2">
-        <input
-          type="text"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          placeholder="Escribe un mensaje..."
-          className="flex-1 px-4 py-2 rounded-full border border-lime-200 focus:outline-none focus:ring-2 focus:ring-lime-500 text-sm"
-        />
+      <form onSubmit={handleSendMessage} className="p-4 pb-8 bg-zinc-950 border-t border-white/5 flex gap-3">
+        <div className="flex-1 bg-white/5 border border-white/10 rounded-3xl flex items-center px-4 focus-within:border-lime-500/50 transition-colors">
+          <input
+            type="text"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder="Escribe algo real..."
+            className="flex-1 bg-transparent py-3 text-sm focus:outline-none placeholder:text-white/20"
+          />
+        </div>
         <button
           type="submit"
-          className="p-2 bg-lime-600 text-white rounded-full hover:bg-lime-700 transition transform active:scale-90"
+          disabled={!inputText.trim()}
+          className="w-12 h-12 bg-lime-500 text-black rounded-full flex items-center justify-center shadow-lg shadow-lime-500/20 active:scale-90 transition-all disabled:opacity-50 disabled:grayscale"
         >
           <svg className="w-5 h-5 fill-current rotate-90" viewBox="0 0 24 24">
             <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />

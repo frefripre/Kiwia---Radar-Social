@@ -2,9 +2,31 @@
 import React, { useState } from 'react';
 import { generateVideoWithVeo, checkApiKey, openApiKeyDialog } from '../services/geminiService';
 
+const PRESETS = [
+  {
+    id: 'promo',
+    label: 'Video Promocional',
+    icon: '✨',
+    prompt: 'A high-end commercial for a mobile app called Kiwia. Cinematic shots of a glowing lime-green kiwi fruit floating above a modern bus stop at night. Transparent digital UI screens showing radar connections between people. Moody atmosphere, neon lighting, sleek motion graphics, professional photography style.'
+  },
+  {
+    id: 'cyber',
+    label: 'Cyberpunk',
+    icon: '🌃',
+    prompt: 'Futuristic bus stop in a rainy Tokyo-style street. Neon signs reflecting in puddles, cinematic lighting, purple and lime green color palette, high-tech interface overlays.'
+  },
+  {
+    id: 'abstract',
+    label: 'Abstracto',
+    icon: '🌀',
+    prompt: 'Ethereal flow of green and white liquid particles forming the shape of a kiwi. Digital waves and pulses representing connectivity and social networking. Minimalist, clean, 8k.'
+  }
+];
+
 export const VideoGenerator: React.FC = () => {
   const [image, setImage] = useState<string | null>(null);
-  const [prompt, setPrompt] = useState('Animate this bus stop scene with cinematic lighting, neon reflections, and smooth movement.');
+  const [prompt, setPrompt] = useState(PRESETS[0].prompt);
+  const [activePreset, setActivePreset] = useState<string>('promo');
   const [isGenerating, setIsGenerating] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState('');
@@ -21,12 +43,19 @@ export const VideoGenerator: React.FC = () => {
     }
   };
 
+  const selectPreset = (p: typeof PRESETS[0]) => {
+    setPrompt(p.prompt);
+    setActivePreset(p.id);
+  };
+
   const handleGenerate = async () => {
     setError(null);
+    setVideoUrl(null);
+    
     const hasKey = await checkApiKey();
     if (!hasKey) {
       await openApiKeyDialog();
-      // Assume success and proceed after dialog closes
+      // Procedemos asumiendo que el usuario seleccionará una llave exitosamente
     }
 
     setIsGenerating(true);
@@ -34,10 +63,10 @@ export const VideoGenerator: React.FC = () => {
     
     try {
       const messages = [
-        'Analizando geometría de la escena...',
-        'Sintetizando frames cinemáticos...',
-        'Renderizando texturas y luz...',
-        'Finalizando tu Kiwi Moment...'
+        'Analizando concepto creativo...',
+        'Generando visuales de alta fidelidad...',
+        'Sintetizando movimiento cinemático...',
+        'Renderizando tu Promo Moment...'
       ];
 
       let msgIndex = 0;
@@ -46,7 +75,7 @@ export const VideoGenerator: React.FC = () => {
           setStatusMessage(messages[msgIndex]);
           msgIndex++;
         }
-      }, 8000);
+      }, 7000);
 
       const url = await generateVideoWithVeo(prompt, image || undefined, '9:16');
       setVideoUrl(url);
@@ -54,10 +83,10 @@ export const VideoGenerator: React.FC = () => {
     } catch (err: any) {
       console.error(err);
       if (err.message?.includes("Requested entity was not found")) {
-        setError("API Key issue. Please select a valid key from a paid GCP project.");
+        setError("API Key no válida o sin facturación. Por favor, selecciona una llave de un proyecto de pago.");
         await openApiKeyDialog();
       } else {
-        setError("Error de generación. Reintenta en unos momentos.");
+        setError("La generación tomó demasiado tiempo o hubo un error de red. Reintenta en unos momentos.");
       }
     } finally {
       setIsGenerating(false);
@@ -67,12 +96,33 @@ export const VideoGenerator: React.FC = () => {
   return (
     <div className="max-w-md mx-auto px-6 py-8 pb-32">
       <div className="mb-8">
-        <h2 className="text-3xl font-black text-white leading-tight">Crea un<br/><span className="text-lime-500 italic">Kiwi Moment</span></h2>
-        <p className="text-white/40 text-xs mt-3 leading-relaxed">Convierte la espera en arte. Sube una foto de tu paradero y deja que la IA de Google Veo le dé vida.</p>
+        <h2 className="text-3xl font-black text-white leading-tight">Crea tu<br/><span className="text-lime-500 italic">Promo de Kiwia</span></h2>
+        <p className="text-white/40 text-xs mt-3 leading-relaxed">Usa nuestros presets publicitarios para generar videos de impacto con la IA de Google Veo.</p>
       </div>
 
       <div className="space-y-6">
-        {/* Upload */}
+        {/* Presets */}
+        <div>
+          <label className="block text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-3">Estilos Publicitarios</label>
+          <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+            {PRESETS.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => selectPreset(p)}
+                className={`flex-shrink-0 px-4 py-3 rounded-2xl border transition-all flex items-center gap-2 ${
+                  activePreset === p.id 
+                    ? 'bg-lime-500 border-lime-500 text-black' 
+                    : 'bg-white/5 border-white/10 text-white/60 hover:border-white/20'
+                }`}
+              >
+                <span className="text-lg">{p.icon}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider">{p.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Upload Area */}
         <div className="relative group">
           <div className={`relative aspect-[9/16] rounded-[32px] overflow-hidden border-2 border-dashed transition-all ${image ? 'border-lime-500' : 'border-white/10 bg-white/5 hover:border-white/20'}`}>
             {image ? (
@@ -82,97 +132,91 @@ export const VideoGenerator: React.FC = () => {
                   onClick={() => setImage(null)}
                   className="absolute top-4 right-4 bg-black/50 backdrop-blur-md text-white p-2 rounded-2xl hover:bg-red-500 transition-colors"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
               </div>
             ) : (
-              <label className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer">
-                <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">📸</div>
-                <p className="text-xs font-bold text-white/60 uppercase tracking-widest">Sube tu paradero</p>
-                <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
+              <label className="flex flex-col items-center justify-center h-full w-full cursor-pointer p-8 text-center">
+                <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">📸</div>
+                <span className="text-xs font-bold text-white/60">Sube una foto base</span>
+                <span className="text-[10px] text-white/20 mt-2">(Opcional para modo texto)</span>
+                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
               </label>
             )}
           </div>
         </div>
 
-        {/* Prompt */}
-        <div className="bg-zinc-900/50 p-5 rounded-3xl border border-white/5">
-          <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-3">Estilo de animación</label>
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            className="w-full bg-transparent text-white text-sm focus:outline-none h-20 resize-none placeholder:text-white/10"
-            placeholder="Describe cómo quieres que se vea..."
-          />
-        </div>
-
-        <button
-          onClick={handleGenerate}
-          disabled={isGenerating}
-          className={`w-full py-5 rounded-[24px] font-black text-sm uppercase tracking-[0.2em] transition-all shadow-xl ${
-            isGenerating 
-              ? 'bg-zinc-800 text-white/20 cursor-not-allowed' 
-              : 'bg-white text-black hover:bg-lime-500 active:scale-95'
-          }`}
-        >
-          {isGenerating ? 'Generando...' : 'Animar con Veo'}
-        </button>
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl">
-            <p className="text-red-500 text-[10px] font-bold text-center">⚠️ {error}</p>
+        {/* Video Output or Progress */}
+        {isGenerating && (
+          <div className="bg-zinc-900 rounded-3xl p-8 text-center animate-pulse border border-white/5">
+            <div className="w-12 h-12 border-4 border-lime-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-sm font-bold text-white">{statusMessage}</p>
+            <p className="text-[10px] text-white/40 mt-2">Esto puede tomar hasta 2 minutos</p>
           </div>
         )}
 
-        {/* Video Overlay / Result */}
-        {isGenerating && (
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[60] flex flex-col items-center justify-center p-10 text-center">
-            <div className="relative w-32 h-32 mb-8">
-              <div className="absolute inset-0 border-2 border-lime-500/20 rounded-full"></div>
-              <div className="absolute inset-0 border-2 border-lime-500 rounded-full border-t-transparent animate-spin"></div>
-              <div className="absolute inset-0 flex items-center justify-center text-4xl">🥝</div>
-            </div>
-            <h3 className="text-xl font-black text-white mb-2">{statusMessage}</h3>
-            <p className="text-white/40 text-xs max-w-xs leading-relaxed">La generación de video de alta calidad toma unos 2 minutos. No cierres esta ventana.</p>
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-center">
+            <p className="text-xs text-red-400 font-medium">{error}</p>
+            <button 
+              onClick={handleGenerate}
+              className="mt-2 text-[10px] font-black uppercase tracking-widest text-white underline"
+            >
+              Reintentar
+            </button>
           </div>
         )}
 
         {videoUrl && (
-          <div className="fixed inset-0 bg-black z-[60] flex flex-col animate-in fade-in duration-700">
-            <div className="flex-1 relative">
-              <video src={videoUrl} controls autoPlay loop className="w-full h-full object-cover" />
-              <button 
-                onClick={() => setVideoUrl(null)}
-                className="absolute top-8 right-8 w-12 h-12 bg-black/50 backdrop-blur-md rounded-2xl flex items-center justify-center text-white text-2xl"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="p-8 pb-12 bg-zinc-950 flex gap-4">
-              <button 
-                onClick={() => {
-                  const a = document.createElement('a');
-                  a.href = videoUrl;
-                  a.download = 'kiwi-moment.mp4';
-                  a.click();
-                }}
-                className="flex-1 bg-white text-black py-5 rounded-3xl font-black uppercase text-xs tracking-widest shadow-xl active:scale-95 transition-all"
-              >
-                Descargar MP4
-              </button>
-              <button 
-                onClick={() => setVideoUrl(null)}
-                className="flex-1 bg-white/5 border border-white/10 text-white/60 py-5 rounded-3xl font-black uppercase text-xs tracking-widest"
-              >
-                Nuevo
-              </button>
-            </div>
+          <div className="space-y-4 animate-in zoom-in-95 duration-500">
+            <video 
+              src={videoUrl} 
+              controls 
+              className="w-full aspect-[9/16] rounded-[32px] bg-zinc-900 shadow-2xl border border-white/10"
+              autoPlay
+              loop
+            />
+            <a 
+              href={videoUrl} 
+              download="kiwia-moment.mp4"
+              className="block w-full bg-white text-black py-4 rounded-2xl text-center font-black text-xs uppercase tracking-[0.2em]"
+            >
+              Descargar Moment
+            </a>
           </div>
         )}
-      </div>
 
-      <div className="mt-12 text-center">
-        <p className="text-[9px] text-white/20 uppercase tracking-[0.3em] font-bold">Powered by Google Veo & Gemini</p>
+        {/* Generate Button */}
+        {!isGenerating && !videoUrl && (
+          <button
+            onClick={handleGenerate}
+            className="w-full bg-lime-500 text-black py-5 rounded-3xl font-black text-sm uppercase tracking-[0.2em] shadow-lg shadow-lime-500/20 hover:scale-[1.02] active:scale-95 transition-all"
+          >
+            Generar con Veo 3.1
+          </button>
+        )}
+        
+        {videoUrl && !isGenerating && (
+          <button
+            onClick={() => setVideoUrl(null)}
+            className="w-full bg-white/5 text-white/40 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest"
+          >
+            Crear otro
+          </button>
+        )}
+      </div>
+      
+      <div className="mt-8 text-center">
+        <a 
+          href="https://ai.google.dev/gemini-api/docs/billing" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-[9px] text-white/20 hover:text-white/40 underline uppercase tracking-widest"
+        >
+          Documentación de Facturación Google Cloud
+        </a>
       </div>
     </div>
   );
