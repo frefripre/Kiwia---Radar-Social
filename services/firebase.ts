@@ -1,22 +1,20 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp } from "firebase/firestore";
+
+// REEMPLAZA ESTOS DATOS con los de tu proyecto en console.firebase.google.com
 const firebaseConfig = {
-  apiKey: "AIzaSyDwemvNRb7UnjfVpMGbSmGrKw0NIqbJBkM",
-  authDomain: "kiwiapp-n.firebaseapp.com",
-  databaseURL: "https://kiwiapp-n.firebaseio.com",
-  projectId: "kiwiapp-n",
-  storageBucket: "kiwiapp-n.firebasestorage.app",
-  messagingSenderId: "843695937893",
-  appId: "1:843695937893:web:1a5193841d2ad9068fa98c",
-  measurementId: "G-SWBQ0HVEPP"
+  apiKey: "TU_API_KEY",
+  authDomain: "tu-proyecto.firebaseapp.com",
+  projectId: "tu-proyecto",
+  storageBucket: "tu-proyecto.appspot.com",
+  messagingSenderId: "TU_SENDER_ID",
+  appId: "TU_APP_ID"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+export const db = getFirestore(app);
+export const isStandby = false;
+
+// Helpers para Firestore
+export { collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp };

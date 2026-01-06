@@ -19,7 +19,7 @@ export const Radar: React.FC<RadarProps> = ({ devices, isScanning, onDeviceSelec
   })), []);
 
   return (
-    <div className="relative w-full aspect-square max-w-sm flex items-center justify-center overflow-visible select-none">
+    <div className="relative w-full aspect-square max-w-sm flex items-center justify-center overflow-visible select-none mx-auto">
       {/* Background Grid Elements */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute top-1/2 left-0 w-full h-px bg-lime-500"></div>
@@ -72,8 +72,8 @@ export const Radar: React.FC<RadarProps> = ({ devices, isScanning, onDeviceSelec
         <div className="w-2 h-2 bg-lime-500 rounded-full shadow-[0_0_20px_rgba(132,204,22,1)] z-10"></div>
         <div className="w-12 h-12 bg-lime-500/10 rounded-full animate-ping"></div>
         <div className="absolute -bottom-12 whitespace-nowrap">
-          <span className="text-[9px] font-black uppercase tracking-[0.4em] text-lime-500/50 animate-pulse">
-            {isScanning ? 'Scanning...' : 'Devices Found'}
+          <span className="text-[9px] font-black uppercase tracking-[0.4em] text-lime-500 animate-pulse">
+            {isScanning ? 'Scanning...' : devices.length > 0 ? 'Signals Found' : 'Signal Standby'}
           </span>
         </div>
       </div>
@@ -84,6 +84,17 @@ export const Radar: React.FC<RadarProps> = ({ devices, isScanning, onDeviceSelec
       {/* Pulse Waves */}
       <div className="absolute inset-0 border border-lime-500/10 rounded-full radar-pulse"></div>
       <div className="absolute inset-0 border border-lime-500/5 rounded-full radar-pulse" style={{ animationDelay: '2s' }}></div>
+
+      {/* Empty State Instructions */}
+      {!isScanning && devices.length === 0 && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <div className="mt-48 bg-zinc-900/80 backdrop-blur-md border border-white/5 px-4 py-2 rounded-2xl animate-in fade-in slide-in-from-bottom-2">
+            <p className="text-[8px] font-black uppercase tracking-widest text-white/40 text-center">
+              Pulsa <span className="text-lime-500">SCAN</span> para detectar<br/>usuarios en tu paradero
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Nearby Devices */}
       {!isScanning && devices.map((device) => {

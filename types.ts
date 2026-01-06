@@ -18,7 +18,7 @@ export interface Message {
   text: string;
   senderId: string;
   timestamp: number;
-  status: 'sent' | 'delivered' | 'read';
+  status: 'sending' | 'sent' | 'delivered' | 'read';
 }
 
 export enum AppState {
@@ -30,3 +30,5 @@ export enum AppState {
   KNOWN = 'known',
   MOMENTS = 'moments'
 }
+
+export type ConnectionStatus = 'idle' | 'requesting' | 'accepted' | 'declined';
