@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { AppState, UserProfile, NearbyDevice, ConnectionStatus } from './types';
-import { Radar } from './components/Radar';
-import { VideoGenerator } from './components/VideoGenerator';
-import { ChatSection } from './components/ChatSection';
-import { NearbyList } from './components/NearbyList';
-import { Hero } from './components/Hero';
-import { scanForRealDevices } from './services/bluetoothService';
-import { isConfigDefault } from './services/firebase';
+import { AppState, UserProfile, NearbyDevice, ConnectionStatus } from './types.ts';
+import { Radar } from './components/Radar.tsx';
+import { VideoGenerator } from './components/VideoGenerator.tsx';
+import { ChatSection } from './components/ChatSection.tsx';
+import { NearbyList } from './components/NearbyList.tsx';
+import { Hero } from './components/Hero.tsx';
+import { scanForRealDevices } from './services/bluetoothService.ts';
+import { isConfigDefault, db } from './services/firebase.ts';
 
 const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<AppState>(AppState.SPLASH);
@@ -19,10 +19,11 @@ const App: React.FC = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [tempAvatar, setTempAvatar] = useState<string | null>(null);
   const [usernameInput, setUsernameInput] = useState('');
-  const [showShareModal, setShowShareModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    console.log("App: Firebase Status Check:", !!db ? "Connected ✅" : "Failed ❌");
+    
     const savedProfile = localStorage.getItem('kiwia_profile');
     if (savedProfile) {
       try {
@@ -139,14 +140,15 @@ const App: React.FC = () => {
 
   const renderRadarContent = () => (
     <div className="flex flex-col h-screen bg-black">
-      {isConfigDefault && (
+      {(!db || isConfigDefault) && (
         <div className="bg-orange-500 text-black text-[9px] font-black py-1.5 px-4 text-center uppercase tracking-widest">
-          Modo Demo: Configura Firebase para habilitar el chat real.
+          {!db ? "⚠️ Error de Firebase: Revisa la consola" : "Modo Demo: Configura Firebase para habilitar el chat real."}
         </div>
       )}
       <header className="p-6 flex justify-between items-center bg-zinc-950/50 backdrop-blur-md border-b border-white/5">
         <div className="flex items-center gap-2">
           <span className="text-lime-500 font-black italic tracking-tighter text-xl">KIWIA</span>
+          <div className={`w-1.5 h-1.5 rounded-full ${db ? 'bg-lime-500 shadow-[0_0_8px_#84cc16]' : 'bg-red-500'}`}></div>
         </div>
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl border border-white/10 overflow-hidden" onClick={handleLogout}>

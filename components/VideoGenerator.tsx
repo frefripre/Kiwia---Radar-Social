@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { generateVideoWithVeo, checkApiKey, openApiKeyDialog } from '../services/geminiService';
 
@@ -52,14 +51,18 @@ export const VideoGenerator: React.FC = () => {
     setError(null);
     setVideoUrl(null);
     
+    // Check if an API key is already selected
     const hasKey = await checkApiKey();
     if (!hasKey) {
+      // Prompt user for API key if missing
       await openApiKeyDialog();
+      // Per rules, proceed immediately as key selection is handled externally
     }
 
     setIsGenerating(true);
     setStatusMessage('Iniciando Veo 3.1...');
     
+    let statusInterval: any = null;
     try {
       const messages = [
         'Analizando concepto de conectividad...',
@@ -69,18 +72,19 @@ export const VideoGenerator: React.FC = () => {
       ];
 
       let msgIndex = 0;
-      const interval = setInterval(() => {
+      statusInterval = setInterval(() => {
         if (msgIndex < messages.length) {
           setStatusMessage(messages[msgIndex]);
           msgIndex++;
         }
       }, 7000);
 
+      // Call service which initializes GoogleGenAI right before making the API call
       const url = await generateVideoWithVeo(prompt, image || undefined, '9:16');
       setVideoUrl(url);
-      clearInterval(interval);
     } catch (err: any) {
       console.error(err);
+      // Reset key selection if specifically requested by API error "Requested entity was not found"
       if (err.message?.includes("Requested entity was not found")) {
         setError("API Key no válida. Selecciona una llave de un proyecto con facturación activa.");
         await openApiKeyDialog();
@@ -89,6 +93,7 @@ export const VideoGenerator: React.FC = () => {
       }
     } finally {
       setIsGenerating(false);
+      if (statusInterval) clearInterval(statusInterval);
     }
   };
 

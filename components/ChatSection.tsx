@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Message } from '../types';
-import { db, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from '../services/firebase';
+import { Message } from '../types.ts';
+import { db, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from '../services/firebase.ts';
 
 interface ChatSectionProps {
   recipientName: string;

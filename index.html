@@ -9,7 +9,7 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Compilador Babel para que el navegador entienda .tsx en kiwia.cl -->
+  <!-- Babel Standalone para transpilar JSX en el navegador -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -49,7 +49,15 @@
     }
   </style>
 
-  <!-- Mapa de importaciones para cargar librerías desde la web -->
+  <script>
+    window.process = {
+      env: {
+        API_KEY: "" 
+      }
+    };
+  </script>
+
+  <!-- Import map unificado: solo React 18 y Firebase 10.8 -->
   <script type="importmap">
 {
   "imports": {
@@ -60,17 +68,15 @@
     "firebase/app": "https://esm.sh/firebase@10.8.0/app",
     "firebase/firestore": "https://esm.sh/firebase@10.8.0/firestore",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "firebase/": "https://esm.sh/firebase@^12.7.0/",
-    "react/": "https://esm.sh/react@^19.2.3/"
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "firebase/": "https://esm.sh/firebase@^12.7.0/"
   }
 }
 </script>
 </head>
 <body>
   <div id="root"></div>
-
-  <!-- Este es el motor que inicia la app. 
-       Usamos type="text/babel" y data-type="module" para que Babel lo procese -->
+  <!-- Cargamos el script con Babel y tipo modulo -->
   <script type="text/babel" data-type="module" src="./index.tsx"></script>
 </body>
 </html>
