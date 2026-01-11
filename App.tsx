@@ -21,7 +21,6 @@ const App: React.FC = () => {
   const [usernameInput, setUsernameInput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-
   useEffect(() => {
     console.log("App: Firebase Status Check:", !!db ? "Connected ✅" : "Failed ❌");
     

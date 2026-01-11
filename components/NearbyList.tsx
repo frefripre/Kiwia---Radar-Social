@@ -77,5 +77,5 @@ export const NearbyList: React.FC<NearbyListProps> = ({ devices, onDeviceSelect 
         }
       `}</style>
     </div>
-  )}
   
+  )}
