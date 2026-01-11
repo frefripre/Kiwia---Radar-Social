@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { AppState, UserProfile, NearbyDevice, ConnectionStatus } from './types.ts';
 import { Radar } from './components/Radar.tsx';
@@ -20,6 +19,15 @@ const App: React.FC = () => {
   const [tempAvatar, setTempAvatar] = useState<string | null>(null);
   const [usernameInput, setUsernameInput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Get a list of cities from your database
+  async function getCities(db) {
+    console.log('asdasdcasd');
+    const citiesCol = collection(db, 'cities');
+    const citySnapshot = await getDocs(citiesCol);
+    const cityList = citySnapshot.docs.map(doc => doc.data());
+    return cityList;
+  }
 
   useEffect(() => {
     console.log("App: Firebase Status Check:", !!db ? "Connected ✅" : "Failed ❌");

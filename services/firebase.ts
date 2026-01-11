@@ -4,14 +4,14 @@ import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, se
 
 // Configuración real de Kiwia
 const firebaseConfig = {
-  apiKey: "AIzaSyDwemvNRb7UnjfVpMGbSmGrKw0NIqbJBkM",
-  authDomain: "kiwiapp-n.firebaseapp.com",
-  databaseURL: "https://kiwiapp-n.firebaseio.com",
-  projectId: "kiwiapp-n",
-  storageBucket: "kiwiapp-n.firebasestorage.app",
-  messagingSenderId: "843695937893",
-  appId: "1:843695937893:web:1a5193841d2ad9068fa98c",
-  measurementId: "G-SWBQ0HVEPP"
+  apiKey: import.meta.env.APIKEY,
+  authDomain: import.meta.env.AUTHDOMAIN,
+  databaseURL: import.meta.env.DATABASEURL,
+  projectId: import.meta.env.PROJECTID,
+  storageBucket: import.meta.env.STORAGEBUCKET,
+  messagingSenderId: import.meta.env.MESSAGINGSENDERID,
+  appId: import.meta.env.APPID,
+  measurementId: import.meta.env.MEASUREMENTID
 };
 
 export const isConfigDefault = false;
