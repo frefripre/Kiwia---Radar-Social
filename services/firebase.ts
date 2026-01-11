@@ -1,16 +1,16 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp } from "firebase/firestore";
+import { getFirestore, collection, doc, where, getDocs, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp } from "firebase/firestore";
 
 // Configuración de Kiwia para kiwiapp-n.firebaseapp.com
 const firebaseConfig = {
-  apiKey: import.meta.env.APIKEY,
-  authDomain: import.meta.env.AUTHDOMAIN,
-  databaseURL: import.meta.env.DATABASEURL,
-  projectId: import.meta.env.PROJECTID,
-  storageBucket: import.meta.env.STORAGEBUCKET,
-  messagingSenderId: import.meta.env.MESSAGINGSENDERID,
-  appId: import.meta.env.APPID,
-  measurementId: import.meta.env.MEASUREMENTID
+  apiKey: import.meta.env.VITE_APIKEY,
+  authDomain: import.meta.env.VITE_AUTHDOMAIN,
+  databaseURL: import.meta.env.VITE_DATABASEURL,
+  projectId: import.meta.env.VITE_PROJECTID,
+  storageBucket: import.meta.env.VITE_STORAGEBUCKET,
+  messagingSenderId: import.meta.env.VITE_MESSAGINGSENDERID,
+  appId: import.meta.env.VITE_APPID,
+  measurementId: import.meta.env.VITE_MEASUREMENTID
 };
 
 export const isConfigDefault = false;
@@ -27,4 +27,4 @@ try {
   db = null;
 }
 
-export { db, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp };
+export { db, collection, doc, where, getDocs, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp };

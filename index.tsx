@@ -1,10 +1,39 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
+// import Firebase from './services/firebase.ts'
+import { db, collection, doc, where, getDocs, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp } from './services/firebase.ts';
+
 
 console.log("Kiwia: Iniciando aplicación...");
 
 const rootElement = document.getElementById('root');
+
+console.log('================================================');
+
+// async function getCities(db) {
+//   console.log('00000000');
+//
+//   const citiesCol = Firebase.collection(db, 'users');
+//   const citySnapshot = await Firebase.getDocs(citiesCol);
+//   const cityList = citySnapshot.docs.map(doc => doc.data());
+//   console.log(cityList)
+//   return cityList;
+// }
+
+// const users = collection(db, 'users');
+// const q = query(users, where("name", "==", "Felipe"));
+// const snapshot = await getDocs(q);
+// console.log(snapshot);
+
+const querySnapshot = await getDocs(collection(db, "users"));
+querySnapshot.forEach((doc) => {
+  console.log(doc.id, doc.data());
+});
+
+
+console.log('================================================');
+
 
 if (!rootElement) {
   console.error("Kiwia Error: No se encontró el div #root.");
