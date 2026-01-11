@@ -1,8 +1,7 @@
-// Modular Firebase initialization for v9+
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp } from "firebase/firestore";
 
-// Configuración real de Kiwia
+// Configuración de Kiwia para kiwiapp-n.firebaseapp.com
 const firebaseConfig = {
   apiKey: "AIzaSyDwemvNRb7UnjfVpMGbSmGrKw0NIqbJBkM",
   authDomain: "kiwiapp-n.firebaseapp.com",
@@ -16,16 +15,15 @@ const firebaseConfig = {
 
 export const isConfigDefault = false;
 
-let app;
 let db: any = null;
 
 try {
-  console.log("Kiwia: Conectando a Firebase...");
-  app = initializeApp(firebaseConfig);
+  console.log("Kiwia: Iniciando Firebase SDK 10.8.0...");
+  const app = initializeApp(firebaseConfig);
   db = getFirestore(app);
-  console.log("Kiwia: Firebase conectado correctamente ✅");
+  console.log("Kiwia: Firestore conectado correctamente ✅");
 } catch (e) {
-  console.error("Kiwia Firebase Error: No se pudo conectar. La app funcionará en modo offline/limitado.", e);
+  console.error("Kiwia Firebase Error Crítico:", e);
   db = null;
 }
 
