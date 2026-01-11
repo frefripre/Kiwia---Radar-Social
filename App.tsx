@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AppState, UserProfile, NearbyDevice, ConnectionStatus } from './types.ts';
-import { Radar } from './components/Radar.tsx';
-import { VideoGenerator } from './components/VideoGenerator.tsx';
-import { ChatSection } from './components/ChatSection.tsx';
-import { NearbyList } from './components/NearbyList.tsx';
-import { Hero } from './components/Hero.tsx';
-import { scanForRealDevices } from './services/bluetoothService.ts';
-import { isConfigDefault, db } from './services/firebase.ts';
+// Fix: Removed extensions for idiomatic imports
+import { AppState, UserProfile, NearbyDevice, ConnectionStatus } from './types';
+import { Radar } from './components/Radar';
+import { VideoGenerator } from './components/VideoGenerator';
+import { ChatSection } from './components/ChatSection';
+import { NearbyList } from './components/NearbyList';
+import { Hero } from './components/Hero';
+import { scanForRealDevices } from './services/bluetoothService';
+import { isConfigDefault, db } from './services/firebase';
 
 const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<AppState>(AppState.SPLASH);
