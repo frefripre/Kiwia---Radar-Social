@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { Message } from '../types.ts';
-import { db, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from '../services/firebase.ts';
+import { Message } from '../types';
+import { db, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from '../services/firebase';
 
 interface ChatSectionProps {
   recipientName: string;
@@ -15,14 +14,11 @@ export const ChatSection: React.FC<ChatSectionProps> = ({ recipientName, recipie
   const chatEndRef = useRef<HTMLDivElement>(null);
   
   const myProfile = JSON.parse(localStorage.getItem('kiwia_profile') || '{"username": "Anónimo"}');
-
-  // ID de sala único basado en orden alfabético para que ambos usuarios entren a la misma
   const chatId = [myProfile.username, recipientName].sort().join('_');
 
   useEffect(() => {
     if (!db) return;
 
-    // Escuchar mensajes en tiempo real de Firestore
     const q = query(
       collection(db, "chats", chatId, "messages"),
       orderBy("timestamp", "asc")
@@ -42,20 +38,32 @@ export const ChatSection: React.FC<ChatSectionProps> = ({ recipientName, recipie
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputText.trim() || !db) return;
+    if (!inputText.trim()) return;
 
     const text = inputText;
     setInputText('');
 
-    try {
-      await addDoc(collection(db, "chats", chatId, "messages"), {
+    if (db) {
+      try {
+        await addDoc(collection(db, "chats", chatId, "messages"), {
+          text: text,
+          senderId: myProfile.username,
+          timestamp: serverTimestamp(),
+          status: 'sent'
+        });
+      } catch (err) {
+        console.error("Error enviando mensaje:", err);
+      }
+    } else {
+      // Modo demo local
+      const newMsg: Message = {
+        id: Date.now().toString(),
         text: text,
         senderId: myProfile.username,
-        timestamp: serverTimestamp(),
+        timestamp: Date.now(),
         status: 'sent'
-      });
-    } catch (err) {
-      console.error("Error enviando mensaje:", err);
+      };
+      setMessages(prev => [...prev, newMsg]);
     }
   };
 
@@ -69,16 +77,16 @@ export const ChatSection: React.FC<ChatSectionProps> = ({ recipientName, recipie
           <div className="flex items-center gap-3">
             <img src={recipientAvatar} className="w-11 h-11 rounded-[18px] object-cover border border-white/10" alt="" />
             <div>
-              <h2 className="font-black text-[15px] italic tracking-tight">{recipientName}</h2>
-              <p className="text-[10px] font-bold text-lime-500/80 uppercase tracking-widest leading-none">Conectado vía Kiwia</p>
+              <h2 className="font-black text-[15px] italic tracking-tight uppercase">{recipientName}</h2>
+              <p className="text-[10px] font-bold text-lime-500/80 uppercase tracking-widest leading-none">Conexión Local</p>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6 scrollbar-hide">
+      <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6 no-scrollbar">
         {messages.length === 0 && (
-          <p className="text-center text-white/20 text-[10px] uppercase font-black tracking-widest py-20">No hay mensajes aún. ¡Saluda!</p>
+          <p className="text-center text-white/20 text-[10px] uppercase font-black tracking-widest py-20">¡Saluda a tu vecino de paradero!</p>
         )}
         {messages.map((msg) => {
           const isMe = msg.senderId === myProfile.username;
@@ -101,7 +109,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({ recipientName, recipie
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="Escribe un mensaje..."
+            placeholder="Escribe algo..."
             className="flex-1 bg-zinc-900 border border-white/5 rounded-2xl py-4 px-6 text-sm focus:outline-none focus:border-lime-500/50 transition-all"
           />
           <button type="submit" className="w-14 h-14 bg-lime-500 text-black rounded-2xl flex items-center justify-center shadow-xl active:scale-90 transition-all">

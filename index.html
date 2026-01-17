@@ -2,15 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kiwia - Local Radar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kiwia - Radar Social</title>
   
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Babel Standalone -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
   
   <style>
@@ -20,39 +15,52 @@
       color: #ffffff;
       margin: 0;
       overflow: hidden;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
-    .scrollbar-hide::-webkit-scrollbar { display: none; }
-    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-    .radar-pulse { animation: pulse 4s cubic-bezier(0, 0.45, 0.55, 1) infinite; }
-    @keyframes pulse { 0% { transform: scale(0.1); opacity: 0.8; } 100% { transform: scale(1.5); opacity: 0; } }
-    .signal-beam { background: conic-gradient(from 0deg, rgba(132, 204, 22, 0.4) 0deg, rgba(132, 204, 22, 0.1) 40deg, transparent 120deg); }
-    .blip { animation: blip-fade 2s ease-out infinite; }
-    @keyframes blip-fade { 0% { opacity: 0; transform: scale(0.5); } 20% { opacity: 1; transform: scale(1.2); } 100% { opacity: 0; transform: scale(1); } }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .glass-panel {
+      background: rgba(18, 18, 18, 0.7);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .kiwi-glow {
+      box-shadow: 0 0 30px rgba(163, 230, 53, 0.15);
+    }
+
+    @keyframes loading {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
   </style>
 
   <script>
-    window.process = { env: { API_KEY: "" } };
+    // Polyfill simple para evitar errores de process.env en componentes que lo busquen
+    window.process = window.process || { env: { API_KEY: "" } };
   </script>
 
-  <!-- Import map LIMPIO y UNIFICADO -->
   <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@18.2.0",
     "react-dom": "https://esm.sh/react-dom@18.2.0",
     "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react/": "https://esm.sh/react@18.2.0/",
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
     "@google/genai": "https://esm.sh/@google/genai@1.34.0",
     "firebase/app": "https://esm.sh/firebase@10.8.0/app",
     "firebase/firestore": "https://esm.sh/firebase@10.8.0/firestore",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "firebase/": "https://esm.sh/firebase@^12.7.0/"
+    "firebase/": "https://esm.sh/firebase@10.8.0/"
   }
 }
 </script>
 </head>
 <body>
   <div id="root"></div>
-  <script type="text/babel" data-type="module" src="./index.tsx"></script>
+  <!-- El entorno automáticamente importa index.tsx como módulo ES6 -->
 </body>
 </html>
